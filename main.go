@@ -27,6 +27,7 @@ func main() {
 	userHandler := handler.NewUserHandler(userService)
 	api.POST("/users", userHandler.RegisterUser)
 	api.POST("/sessions", userHandler.LoginUser)
+	api.POST("/email_check", userHandler.CheckEmailUnique)
 
 	router.Run(":3080")
 }
