@@ -2,6 +2,7 @@ package main
 
 import (
 	"go-crowdfunding/auth"
+	"go-crowdfunding/campaign"
 	"go-crowdfunding/handler"
 	"go-crowdfunding/helper"
 	"go-crowdfunding/user"
@@ -30,17 +31,29 @@ func main() {
 	}
 
 	router := gin.Default()
+	router.Static("/assets", "./assets")
 	api := router.Group("/api/v1")
 
-	// user
+	// repository
 	userRepository := user.NewRepository(db)
+	campaignRepository := campaign.NewRepository(db)
+
+	// service
 	userService := user.NewService(userRepository)
 	authService := auth.NewService()
+	campaignService := campaign.NewService(campaignRepository)
+
+	// handler
 	userHandler := handler.NewUserHandler(userService, authService)
+	campaignHandler := handler.NewCampaignHandler(campaignService)
+
+	// route
 	api.POST("/users", userHandler.RegisterUser)
 	api.POST("/sessions", userHandler.LoginUser)
 	api.POST("/email_check", userHandler.CheckEmailUnique)
 	api.POST("/avatar", authMiddleware(authService, userService), userHandler.UploadAvatar)
+
+	api.GET("/campaigns", campaignHandler.GetCampaigns)
 
 	router.Run(":3080")
 }
